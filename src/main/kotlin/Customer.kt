@@ -9,10 +9,13 @@
 class Customer {
 
     /**
-     * Sits down at a table.
+     * Sits down at a table if there's an available seat. Otherwise, the customer complains.
      */
-    fun sitDown(table: Table) {
-        TODO("Implement")
+    fun sitAt(table: Table): Table {
+        if (table.hasAvailableSeat()) {
+            return table.copy(seats = table.seats + 1, seatedCustomers = table.seatedCustomers.plus(this))
+        }
+        throw CustomerCompliant("I can't sit down! At $table")
     }
 
     /**
@@ -41,6 +44,8 @@ class Customer {
     }
 
     fun leave() {
-        TODO("Implement")
+
     }
+
+    class CustomerCompliant(complaint: String) : RuntimeException(complaint)
 }
