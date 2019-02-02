@@ -8,12 +8,15 @@ class Customer {
     }
 
     /**
-     * Peruses a [menu] and gives an [Order] when ready.
+     * Peruses a [Menu] and gives an [Order] when ready.
      */
     fun order(menu: Menu): Order {
         TODO("Implement")
     }
 
+    /**
+     * Eats a meal.
+     */
     fun dine(meal: Meal) {
         TODO("Implement")
     }
