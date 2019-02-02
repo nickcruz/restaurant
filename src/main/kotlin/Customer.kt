@@ -1,3 +1,11 @@
+/**
+ * Dines in the [Restaurant] and causes most of the waiting time for the waitstaff and cooks.
+ *
+ * Ideally, the restaurant should be relatively impervious to any delays that a customer will impose on the waitstaff.
+ *
+ * Write unit tests configuring number of waitstaff, tables, restaurants, etc. to account for the highest number of
+ * Customers.
+ */
 class Customer {
 
     /**
@@ -21,6 +29,9 @@ class Customer {
         TODO("Implement")
     }
 
+    /**
+     * Has to be asked if they are finished eating before giving a bill.
+     */
     fun isFinishedEating(): Boolean {
         TODO("Implement")
     }
