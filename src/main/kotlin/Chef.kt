@@ -13,7 +13,6 @@ class Chef(private val orders: ReceiveChannel<Order>, private val meals: SendCha
 
     private var job: Job? = null
 
-    // TODO: Maybe it'd even be easier to imagine if Chef implemented the job, so that we have a 1:1 object:coroutine ratio.
     fun startCooking() {
         close()
         job = GlobalScope.launch {
@@ -28,13 +27,13 @@ class Chef(private val orders: ReceiveChannel<Order>, private val meals: SendCha
     }
 
     private suspend fun cookOrder(order: Order): Meal {
-        print("Cooking $order...")
+        println("Cooking $order...")
         delay(COOK_DELAY)
-        print("Done.\n")
+        println("\tFinished cooking $order.")
         return Meal(order.dish, order.customer)
     }
 
     companion object {
-        const val COOK_DELAY = 2000L
+        private const val COOK_DELAY = 2000L
     }
 }
