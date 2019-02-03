@@ -12,16 +12,13 @@ class Customer {
      * Sits down at a table if there's an available seat. Otherwise, the customer complains.
      */
     fun sitAt(table: Table): Table {
-        if (table.hasAvailableSeat()) {
-            return table.copy(seats = table.seats + 1, seatedCustomers = table.seatedCustomers.plus(this))
-        }
-        throw CustomerCompliant("I can't sit down! At $table")
+        TODO("Implement dining experience first.")
     }
 
     /**
      * Peruses a [Menu] and gives an [Order] when ready.
      */
-    fun order(menu: Menu): Order {
+    fun order(menu: Menu): Order  {
         TODO("Implement")
     }
 
