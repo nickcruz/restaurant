@@ -18,7 +18,7 @@ class Customer {
     /**
      * Peruses a [Menu] and gives an [Order] when ready.
      */
-    fun order(menu: Menu): Order  {
+    fun order(menu: Menu): Order {
         TODO("Implement")
     }
 
@@ -45,4 +45,8 @@ class Customer {
     }
 
     class CustomerCompliant(complaint: String) : RuntimeException(complaint)
+
+    companion object {
+        const val EAT_DELAY = 10_000L
+    }
 }

@@ -1,2 +1,1 @@
-class Waiter {
-}
+class Waiter
