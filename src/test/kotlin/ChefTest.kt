@@ -5,11 +5,11 @@ import io.kotlintest.matchers.numerics.shouldBeGreaterThan
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.system.measureTimeMillis
 
@@ -32,20 +32,20 @@ class ChefTest : StringSpec() {
     private lateinit var orders: Channel<Order>
     private lateinit var meals: Channel<Meal>
 
-    private lateinit var chefs: List<Chef>
+    private lateinit var chefs: List<Job>
 
     override fun beforeTest(testCase: TestCase) {
         orders = Channel()
         meals = Channel(UNLIMITED) // Assume infinite waiters. TODO: Add unit tests for having less waiters.
 
-        chefs = List(chefsCount) { autoClose(Chef(orders, meals)) }
+        chefs = List(chefsCount) { GlobalScope.hireChef(orders, meals) }
     }
 
     override fun afterTest(testCase: TestCase, result: TestResult) {
         orders.close()
         meals.close()
 
-        closeResources()
+        chefs.forEach { it.cancel() }
     }
 
     init {
@@ -54,12 +54,12 @@ class ChefTest : StringSpec() {
                 row(spaghettiOrder, spaghettiMeal),
                 row(adoboOrder, adoboMeal)
             ) { order, meal ->
-                chefs.map { it.startCooking() }
+                chefs.map { it.start() }
                 runBlocking {
+                    orders.send(order)
                     withTimeout(testTimeout) {
-                        orders.send(order)
-                        withContext(Dispatchers.Default) { meals.receive() } shouldBe meal
-                    }
+                        meals.receive()
+                    } shouldBe meal
                 }
             }
         }
@@ -71,7 +71,7 @@ class ChefTest : StringSpec() {
                 meals.receive()
                 meals.receive()
             }
-            chefs[0].startCooking()
+            chefs[0].start()
             val oneCook = measureTimeMillis {
                 runBlocking {
                     withTimeout(testTimeout) {
@@ -80,7 +80,7 @@ class ChefTest : StringSpec() {
                 }
             }
 
-            chefs[1].startCooking()
+            chefs[1].start()
             val twoCooks = measureTimeMillis {
                 runBlocking {
                     withTimeout(testTimeout) {
