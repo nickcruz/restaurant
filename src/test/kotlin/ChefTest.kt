@@ -6,9 +6,9 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import io.kotlintest.tables.row
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlin.system.measureTimeMillis
@@ -27,25 +27,25 @@ class ChefTest : StringSpec() {
     private val adoboOrder = Order(adoboDish, customer)
     private val adoboMeal = Meal(adoboDish, customer)
 
-    private val chefsCount = 2
+    private lateinit var testOrders: Channel<Order>
+    private lateinit var testMeals: Channel<Meal>
 
-    private lateinit var orders: Channel<Order>
-    private lateinit var meals: Channel<Meal>
-
-    private lateinit var chefs: List<Job>
+    private lateinit var restaurant: Restaurant
 
     override fun beforeTest(testCase: TestCase) {
-        orders = Channel()
-        meals = Channel(UNLIMITED) // Assume infinite waiters. TODO: Add unit tests for having less waiters.
+        testOrders = Channel()
+        testMeals = Channel(UNLIMITED)
 
-        chefs = List(chefsCount) { GlobalScope.hireChef(orders, meals) }
+        restaurant = Restaurant {
+            hireChef("Adam", testOrders, testMeals)
+            hireChef("Emily", testOrders, testMeals)
+            hireChef("Nick", testOrders, testMeals)
+            hireChef("Noah", testOrders, testMeals)
+        }
     }
 
     override fun afterTest(testCase: TestCase, result: TestResult) {
-        orders.close()
-        meals.close()
-
-        chefs.forEach { it.cancel() }
+        restaurant.closeRestaurant()
     }
 
     init {
@@ -54,11 +54,10 @@ class ChefTest : StringSpec() {
                 row(spaghettiOrder, spaghettiMeal),
                 row(adoboOrder, adoboMeal)
             ) { order, meal ->
-                chefs.map { it.start() }
                 runBlocking {
-                    orders.send(order)
+                    testOrders.send(order)
                     withTimeout(testTimeout) {
-                        meals.receive()
+                        testMeals.receive()
                     } shouldBe meal
                 }
             }
@@ -66,12 +65,13 @@ class ChefTest : StringSpec() {
 
         "two cooks cook faster than one" {
             val cookTwoMeals = suspend {
-                orders.send(spaghettiOrder)
-                orders.send(adoboOrder)
-                meals.receive()
-                meals.receive()
+                testOrders.send(spaghettiOrder)
+                testOrders.send(adoboOrder)
+                testMeals.receive()
+                testMeals.receive()
             }
-            chefs[0].start()
+
+            // Create a restaurant with one chef.
             val oneCook = measureTimeMillis {
                 runBlocking {
                     withTimeout(testTimeout) {
@@ -80,7 +80,7 @@ class ChefTest : StringSpec() {
                 }
             }
 
-            chefs[1].start()
+            // Create a new restaurant with more chefs.
             val twoCooks = measureTimeMillis {
                 runBlocking {
                     withTimeout(testTimeout) {
