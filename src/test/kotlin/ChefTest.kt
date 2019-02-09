@@ -1,17 +1,8 @@
+
 import io.kotlintest.TestCase
 import io.kotlintest.TestResult
-import io.kotlintest.data.forall
-import io.kotlintest.matchers.numerics.shouldBeGreaterThan
-import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
-import io.kotlintest.tables.row
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
-import kotlin.system.measureTimeMillis
 
 class ChefTest : StringSpec() {
 
@@ -33,15 +24,17 @@ class ChefTest : StringSpec() {
     private lateinit var restaurant: Restaurant
 
     override fun beforeTest(testCase: TestCase) {
-        testOrders = Channel()
-        testMeals = Channel(UNLIMITED)
+        // Initialize test inputs and outputs
+//        testOrders = Channel()
+//        testMeals = Channel(UNLIMITED)
 
-        restaurant = Restaurant {
-            hireChef("Adam", testOrders, testMeals)
-            hireChef("Emily", testOrders, testMeals)
-            hireChef("Nick", testOrders, testMeals)
-            hireChef("Noah", testOrders, testMeals)
-        }
+        // Initialize Restaurant and inject with test inputs
+//        restaurant = Restaurant {
+//            hireChef("Adam", testOrders, testMeals)
+//            hireChef("Emily", testOrders, testMeals)
+//            hireChef("Nick", testOrders, testMeals)
+//            hireChef("Noah", testOrders, testMeals)
+//        }
     }
 
     override fun afterTest(testCase: TestCase, result: TestResult) {
@@ -49,47 +42,47 @@ class ChefTest : StringSpec() {
     }
 
     init {
-        "sending order cooks meal" {
-            forall(
-                row(spaghettiOrder, spaghettiMeal),
-                row(adoboOrder, adoboMeal)
-            ) { order, meal ->
-                runBlocking {
-                    testOrders.send(order)
-                    withTimeout(testTimeout) {
-                        testMeals.receive()
-                    } shouldBe meal
-                }
-            }
-        }
-
-        "two cooks cook faster than one" {
-            val cookTwoMeals = suspend {
-                testOrders.send(spaghettiOrder)
-                testOrders.send(adoboOrder)
-                testMeals.receive()
-                testMeals.receive()
-            }
-
-            // Create a restaurant with one chef.
-            val oneCook = measureTimeMillis {
-                runBlocking {
-                    withTimeout(testTimeout) {
-                        cookTwoMeals()
-                    }
-                }
-            }
-
-            // Create a new restaurant with more chefs.
-            val twoCooks = measureTimeMillis {
-                runBlocking {
-                    withTimeout(testTimeout) {
-                        cookTwoMeals()
-                    }
-                }
-            }
-
-            oneCook shouldBeGreaterThan twoCooks
-        }
+//        "sending order cooks meal" {
+//            forall(
+//                row(spaghettiOrder, spaghettiMeal),
+//                row(adoboOrder, adoboMeal)
+//            ) { order, meal ->
+//                runBlocking {
+//                    testOrders.send(order)
+//                    withTimeout(testTimeout) {
+//                        testMeals.receive()
+//                    } shouldBe meal
+//                }
+//            }
+//        }
+//
+//        "two cooks cook faster than one" {
+//            val cookTwoMeals = suspend {
+//                testOrders.send(spaghettiOrder)
+//                testOrders.send(adoboOrder)
+//                testMeals.receive()
+//                testMeals.receive()
+//            }
+//
+//            // Create a restaurant with one chef.
+//            val oneCook = measureTimeMillis {
+//                runBlocking {
+//                    withTimeout(testTimeout) {
+//                        cookTwoMeals()
+//                    }
+//                }
+//            }
+//
+//            // Create a new restaurant with more chefs.
+//            val twoCooks = measureTimeMillis {
+//                runBlocking {
+//                    withTimeout(testTimeout) {
+//                        cookTwoMeals()
+//                    }
+//                }
+//            }
+//
+//            oneCook shouldBeGreaterThan twoCooks
+//        }
     }
 }

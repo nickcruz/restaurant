@@ -10,10 +10,13 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Our Restaurant launches all of the coroutines that will make the restaurant run. Hiring waitstaff or chefs launch
- * coroutines that wait for things like incoming customers or cooked meals.
+ * Our Restaurant is a [CoroutineContext] containing all of the child coroutines that make the restaurant run and serve
+ * customers.
+ *
+ * <p>Hiring waitstaff or chefs (or anyone else that works at the restaurant) launches coroutines in the context of the
+ * restaurant. When the restaurant closes for the day, all workers should also be closed for the day.
  */
-class Restaurant(setUpRestaurant: suspend Restaurant.() -> Unit) : CoroutineScope {
+class Restaurant : CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Job()
 
@@ -21,7 +24,22 @@ class Restaurant(setUpRestaurant: suspend Restaurant.() -> Unit) : CoroutineScop
     private val chefMeals = Channel<Meal>(UNLIMITED) // For now, assume infinite waiters.
 
     /**
-     * Hires a chef. Chefs require no training and begin cooking immediately if there are orders to cook.
+     * Welcomes a group of [Customer]s. A group of customers will want to sit with each other at the same table.
+     *
+     * Customers are not coroutines--they don't have any work to do. That's the [Job] of many different other
+     * coroutines to keep track of where Customers are in their dining experience.
+     *
+     * TODO: Implement the Customer dining experience.
+     */
+    fun welcome(customers: List<Customer>) {
+        TODO("Implement")
+    }
+
+    /**
+     * Hires a chef. Chefs require no training and begin cooking immediately if there are orders to cook. Otherwise,
+     * chefs will *suspend* their work until they are given a new order to cook.
+     *
+     * Hiring a chef attaches a coroutine to the restaurant coroutine.
      */
     fun hireChef(
         name: String,
@@ -37,16 +55,13 @@ class Restaurant(setUpRestaurant: suspend Restaurant.() -> Unit) : CoroutineScop
     }
 
     /**
-     * Welcomes a group of [Customer]s. A group of customers will want to sit with each other at the same table.
-     */
-    fun welcome(customers: List<Customer>) {
-        TODO("Implement")
-    }
-
-    /**
      * Closes the restaurant at the end of the day.
      */
     fun closeRestaurant() {
         coroutineContext.cancel()
+    }
+
+    companion object {
+        private const val COOK_DELAY = 2000L
     }
 }
