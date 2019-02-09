@@ -1,11 +1,9 @@
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -24,43 +22,20 @@ class Restaurant : CoroutineScope {
     private val chefMeals = Channel<Meal>(UNLIMITED) // For now, assume infinite waiters.
 
     /**
-     * Welcomes a group of [Customer]s. A group of customers will want to sit with each other at the same table.
-     *
-     * Customers are not coroutines--they don't have any work to do. That's the [Job] of many different other
-     * coroutines to keep track of where Customers are in their dining experience.
-     *
-     * TODO: Implement the Customer dining experience.
-     */
-    fun welcome(customers: List<Customer>) {
-        TODO("Implement")
-    }
-
-    /**
      * Hires a chef. Chefs require no training (for now) and begin cooking immediately if there are orders to cook.
      *
      * Hiring a chef attaches a coroutine to the restaurant coroutine.
+     *
+     * TODO: Not sure how to test this quite yet or whether or not this is the best API for hiring a Chef.
      */
     fun hireChef(
-        name: String,
+        chef: Chef,
         orders: ReceiveChannel<Order> = chefOrders,
         meals: SendChannel<Meal> = chefMeals
     ) = launch {
         for (order in orders) {
-            println("$name is cooking $order...")
-            delay(COOK_DELAY)
-            println("\t$name finished cooking $order.")
+            chef.cookOrder(order)
             meals.send(Meal(order.dish, order.customer))
         }
-    }
-
-    /**
-     * Closes the restaurant at the end of the day.
-     */
-    fun closeRestaurant() {
-        coroutineContext.cancel()
-    }
-
-    companion object {
-        private const val COOK_DELAY = 2000L
     }
 }
