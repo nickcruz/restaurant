@@ -10,11 +10,11 @@ import kotlin.system.measureTimeMillis
 
 class ChefTest : StringSpec() {
 
-    private val customer = Customer()
+    private val mika = Customer("Mika")
 
     private val spaghettiDish = Dish("Spaghetti", 10)
-    private val spaghettiOrder = Order(spaghettiDish, customer)
-    private val spaghettiMeal = Meal(spaghettiDish, customer)
+    private val spaghettiOrder = Order(spaghettiDish, mika)
+    private val spaghettiMeal = Meal(spaghettiDish, mika)
 
     private lateinit var nick: Chef
     private lateinit var emily: Chef
