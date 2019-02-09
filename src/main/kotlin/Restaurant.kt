@@ -36,8 +36,7 @@ class Restaurant : CoroutineScope {
     }
 
     /**
-     * Hires a chef. Chefs require no training and begin cooking immediately if there are orders to cook. Otherwise,
-     * chefs will *suspend* their work until they are given a new order to cook.
+     * Hires a chef. Chefs require no training (for now) and begin cooking immediately if there are orders to cook.
      *
      * Hiring a chef attaches a coroutine to the restaurant coroutine.
      */
