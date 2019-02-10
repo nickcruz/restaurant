@@ -3,15 +3,18 @@ import io.kotlintest.matchers.string.contain
 import io.kotlintest.should
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
+import kotlinx.coroutines.GlobalScope
 
 class WaiterTest : StringSpec() {
 
-    private val mika = Customer("Mika")
+    private val mika = Customer("Mika", coroutineScope = GlobalScope)
 
     private lateinit var nick: Waiter
 
     override fun beforeTest(testCase: TestCase) {
-        nick = Waiter("Nick")
+        nick = Waiter("Nick", coroutineScope = GlobalScope) {
+            Meal(it.dish, it.customer)
+        }
     }
 
     init {

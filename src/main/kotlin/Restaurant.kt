@@ -38,4 +38,14 @@ class Restaurant : CoroutineScope {
             meals.send(Meal(order.dish, order.customer))
         }
     }
+
+    companion object {
+        val MENU =
+            Menu(
+                Dish("Spaghetti", 15),
+                Dish("Adobo", 8),
+                Dish("Pad Thai", 12),
+                Dish("Spicy Miso Ramen", 22)
+            )
+    }
 }

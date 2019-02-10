@@ -3,6 +3,7 @@ import io.kotlintest.matchers.beLessThan
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -10,7 +11,7 @@ import kotlin.system.measureTimeMillis
 
 class ChefTest : StringSpec() {
 
-    private val mika = Customer("Mika")
+    private val mika = Customer("Mika", coroutineScope = GlobalScope)
 
     private val spaghettiDish = Dish("Spaghetti", 10)
     private val spaghettiOrder = Order(spaghettiDish, mika)
